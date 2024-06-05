@@ -42,6 +42,10 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 Contributions are welcome! If you have any improvements or bug fixes, feel free to submit a pull request.
 
+## Acknowledgements
+
+Special thanks to Rodrigo Guimarães for their valuable contributions to this project!
+
 ## Contact
 
 If you have any questions or feedback, feel free to open an issue on GitHub.
