@@ -8,5 +8,11 @@ namespace RoundedPanel.Test
         {
             InitializeComponent();
         }
+
+        private void FormTest_Load(object sender, System.EventArgs e)
+        {
+   
+
+        }
     }
 }

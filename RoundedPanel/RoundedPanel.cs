@@ -1,132 +1,153 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
 namespace RoundedPanel
 {
     public partial class RoundedPanel : Panel
     {
-        #region "Members"
+        private int _radiusTopLeft = 20;
+        private int _radiusTopRight = 20;
+        private int _radiusBottomLeft = 20;
+        private int _radiusBottomRight = 20;
 
-        /// <summary>
-        /// Border radius of the panel
-        /// </summary>
-        private int _borderRadius = 30;
+        private int _borderThickness = 1;
+        private Color _borderColor = Color.DimGray;
 
-        private int _radiusTopLeft = 30;
-        private int _radiusTopRight = 30;
-        private int _radiusButtonLeft = 30;
-        private int _radiusButtonRight = 30;
+        #region Construtores
+
+        public RoundedPanel()
+        {
+            this.BackColor = Color.LightYellow;
+            this.BorderStyle = BorderStyle.None; // IMPORTANTE: não usar o BorderStyle nativo
+
+            this.SetStyle(ControlStyles.AllPaintingInWmPaint |
+                          ControlStyles.OptimizedDoubleBuffer |
+                          ControlStyles.ResizeRedraw |
+                          ControlStyles.UserPaint, true);
+        }
+
+        public RoundedPanel(IContainer container) : this()
+        {
+            container?.Add(this);
+        }
 
         #endregion
 
-        #region "Properties"
+        #region Propriedades
 
-        public int BorderRadius
-        {
-            get { return _borderRadius; }
-            set { _borderRadius = value; Invalidate(); }
-        }
-
+        [Category("Appearance")]
         public int RadiusTopLeft
         {
-            get { return _radiusTopLeft; }
-            set { _radiusTopLeft = value; this.Invalidate(); }
+            get => _radiusTopLeft;
+            set { _radiusTopLeft = Math.Max(1, value); Invalidate(); }
         }
 
+        [Category("Appearance")]
         public int RadiusTopRight
         {
-            get { return _radiusTopRight; }
-            set { _radiusTopRight = value; this.Invalidate(); }
+            get => _radiusTopRight;
+            set { _radiusTopRight = Math.Max(1, value); Invalidate(); }
         }
 
-        public int RadiusButtonLeft
+        [Category("Appearance")]
+        public int RadiusBottomLeft
         {
-            get { return _radiusButtonLeft; }
-            set { _radiusButtonLeft = value; this.Invalidate(); }
+            get => _radiusBottomLeft;
+            set { _radiusBottomLeft = Math.Max(1, value); Invalidate(); }
         }
 
-        public int RadiusButtonRight
+        [Category("Appearance")]
+        public int RadiusBottomRight
         {
-            get { return _radiusButtonRight; }
-            set { _radiusButtonRight = value; this.Invalidate(); }
+            get => _radiusBottomRight;
+            set { _radiusBottomRight = Math.Max(1, value); Invalidate(); }
+        }
+
+        [Category("Appearance")]
+        public int BorderThickness
+        {
+            get => _borderThickness;
+            set { _borderThickness = Math.Max(0, value); Invalidate(); }
+        }
+
+        [Category("Appearance")]
+        public Color BorderColor
+        {
+            get => _borderColor;
+            set { _borderColor = value; Invalidate(); }
+        }
+
+        // Compatibilidade com BorderRadius antigo
+        [Browsable(true)]
+        [Category("Appearance")]
+        public int BorderRadius
+        {
+            get => RadiusTopLeft;
+            set
+            {
+                int v = Math.Max(1, value);
+                RadiusTopLeft = v;
+                RadiusTopRight = v;
+                RadiusBottomLeft = v;
+                RadiusBottomRight = v;
+            }
         }
 
         #endregion
 
-        #region "Constructors"
+        #region Paint
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public RoundedPanel() : base()
-        {
-            Resize += new EventHandler(RoundedPanel_Resize);
-            BackColor = System.Drawing.Color.LightBlue;
-        }
-
-        /// <summary>
-        /// Constructor with container
-        /// </summary>
-        /// <param name="container">The container</param>
-        public RoundedPanel(IContainer container)
-            : this()
-        {
-            container.Add(this);
-
-            InitializeComponent();
-        }
-
-        #endregion
-
-        #region "Events"
-
-        /// <summary>
-        /// Event handler for resize
-        /// </summary>
-        /// <param name="sender">The sender</param>
-        /// <param name="e">The event arguments</param>
-        private void RoundedPanel_Resize(object sender, EventArgs e)
-        {
-            Invalidate();
-        }
-
-        /// <summary>
-        /// Event handler for paint
-        /// </summary>
-        /// <param name="e">The paint event arguments</param>
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
 
-            System.Drawing.Graphics g = e.Graphics;
-            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            g.Clear(this.Parent.BackColor);
+            Graphics g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
 
-            System.Drawing.Rectangle rect = this.ClientRectangle;
+            Color parentBack = this.Parent?.BackColor ?? SystemColors.Control;
+            g.Clear(parentBack);
 
-            if (RadiusTopLeft == 0)
-                RadiusTopLeft = 1;
+            Rectangle rect = new Rectangle(
+                _borderThickness,
+                _borderThickness,
+                this.Width - (_borderThickness * 2) - 1,
+                this.Height - (_borderThickness * 2) - 1
+            );
 
-            if (RadiusTopRight == 0)
-                RadiusTopRight = 1;
-
-            if (RadiusButtonLeft == 0)
-                RadiusButtonLeft = 1;
-
-            if (RadiusButtonRight == 0)
-                RadiusButtonRight = 1;
-
-            using (System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath())
+            using (GraphicsPath path = GetRoundedPath(rect))
             {
-                path.AddArc(rect.X, rect.Y, RadiusTopLeft, RadiusTopLeft, 180, 90);
-                path.AddArc(rect.X + rect.Width - RadiusTopRight, rect.Y, RadiusTopRight, RadiusTopRight, 270, 90);
-                path.AddArc(rect.X + rect.Width - RadiusButtonRight, rect.Y + rect.Height - RadiusButtonRight, RadiusButtonRight, RadiusButtonRight, 0, 90);
-                path.AddArc(rect.X, rect.Y + rect.Height - RadiusButtonLeft, RadiusButtonLeft, RadiusButtonLeft, 90, 90);
-                path.CloseFigure();
+                // Fundo
+                using (SolidBrush brush = new SolidBrush(this.BackColor))
+                {
+                    g.FillPath(brush, path);
+                }
 
-                g.FillPath(new System.Drawing.SolidBrush(this.BackColor), path);
+                // Borda arredondada
+                if (_borderThickness > 0)
+                {
+                    using (Pen pen = new Pen(_borderColor, _borderThickness))
+                    {
+                        pen.Alignment = PenAlignment.Center;
+                        g.DrawPath(pen, path);
+                    }
+                }
             }
+        }
+
+        private GraphicsPath GetRoundedPath(Rectangle rect)
+        {
+            GraphicsPath path = new GraphicsPath();
+
+            path.AddArc(rect.X, rect.Y, RadiusTopLeft, RadiusTopLeft, 180, 90);
+            path.AddArc(rect.Right - RadiusTopRight, rect.Y, RadiusTopRight, RadiusTopRight, 270, 90);
+            path.AddArc(rect.Right - RadiusBottomRight, rect.Bottom - RadiusBottomRight, RadiusBottomRight, RadiusBottomRight, 0, 90);
+            path.AddArc(rect.X, rect.Bottom - RadiusBottomLeft, RadiusBottomLeft, RadiusBottomLeft, 90, 90);
+            path.CloseFigure();
+
+            return path;
         }
 
         #endregion
