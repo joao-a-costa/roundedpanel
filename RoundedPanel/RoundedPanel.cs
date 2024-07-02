@@ -13,6 +13,11 @@ namespace RoundedPanel
         /// </summary>
         private int _borderRadius = 30;
 
+        private int _radiusTopLeft = 30;
+        private int _radiusTopRight = 30;
+        private int _radiusButtonLeft = 30;
+        private int _radiusButtonRight = 30;
+
         #endregion
 
         #region "Properties"
@@ -21,6 +26,30 @@ namespace RoundedPanel
         {
             get { return _borderRadius; }
             set { _borderRadius = value; Invalidate(); }
+        }
+
+        public int RadiusTopLeft
+        {
+            get { return _radiusTopLeft; }
+            set { _radiusTopLeft = value; this.Invalidate(); }
+        }
+
+        public int RadiusTopRight
+        {
+            get { return _radiusTopRight; }
+            set { _radiusTopRight = value; this.Invalidate(); }
+        }
+
+        public int RadiusButtonLeft
+        {
+            get { return _radiusButtonLeft; }
+            set { _radiusButtonLeft = value; this.Invalidate(); }
+        }
+
+        public int RadiusButtonRight
+        {
+            get { return _radiusButtonRight; }
+            set { _radiusButtonRight = value; this.Invalidate(); }
         }
 
         #endregion
@@ -75,14 +104,25 @@ namespace RoundedPanel
             g.Clear(this.Parent.BackColor);
 
             System.Drawing.Rectangle rect = this.ClientRectangle;
-            int radius = _borderRadius;
+
+            if (RadiusTopLeft == 0)
+                RadiusTopLeft = 1;
+
+            if (RadiusTopRight == 0)
+                RadiusTopRight = 1;
+
+            if (RadiusButtonLeft == 0)
+                RadiusButtonLeft = 1;
+
+            if (RadiusButtonRight == 0)
+                RadiusButtonRight = 1;
 
             using (System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath())
             {
-                path.AddArc(rect.X, rect.Y, radius, radius, 180, 90);
-                path.AddArc(rect.X + rect.Width - radius, rect.Y, radius, radius, 270, 90);
-                path.AddArc(rect.X + rect.Width - radius, rect.Y + rect.Height - radius, radius, radius, 0, 90);
-                path.AddArc(rect.X, rect.Y + rect.Height - radius, radius, radius, 90, 90);
+                path.AddArc(rect.X, rect.Y, RadiusTopLeft, RadiusTopLeft, 180, 90);
+                path.AddArc(rect.X + rect.Width - RadiusTopRight, rect.Y, RadiusTopRight, RadiusTopRight, 270, 90);
+                path.AddArc(rect.X + rect.Width - RadiusButtonRight, rect.Y + rect.Height - RadiusButtonRight, RadiusButtonRight, RadiusButtonRight, 0, 90);
+                path.AddArc(rect.X, rect.Y + rect.Height - RadiusButtonLeft, RadiusButtonLeft, RadiusButtonLeft, 90, 90);
                 path.CloseFigure();
 
                 g.FillPath(new System.Drawing.SolidBrush(this.BackColor), path);
