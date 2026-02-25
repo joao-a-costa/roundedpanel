@@ -29,9 +29,9 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.roundedPanel1 = new RoundedPanel.RoundedPanel(this.components);
-            this.roundedPanel2 = new RoundedPanel.RoundedPanel(this.components);
-            this.roundedPanel3 = new RoundedPanel.RoundedPanel(this.components);
+            this.roundedPanel1 = new RoundedPanel(this.components);
+            this.roundedPanel2 = new RoundedPanel(this.components);
+            this.roundedPanel3 = new RoundedPanel(this.components);
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.roundedPanel1.SuspendLayout();
             this.SuspendLayout();
